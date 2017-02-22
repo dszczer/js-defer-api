@@ -1,7 +1,7 @@
 /**
- * Js Defer API
+ * Js Defer API.
  * @author Damian Szczerbiński
- * @licence MIT
+ * @license MIT
  * @version 1.0
  * @requires vanillaJS, no external dependencies
  * @description This simple tricky API helps to defer script in specified order to load after HTML DOM is loaded.
