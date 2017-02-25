@@ -11,68 +11,93 @@ API contains 3 very simple global functions: DeferReady, DeferRenderScriptSequen
   // ... minified API
 </script>
 ```
-Then load some scripts with *DeferRenderScriptTag
+Then load some scripts with `DeferReady` function.
 
 ### DeferReady
-This function accepts argument to call when defer API will launch. It helps to load bunch of scripts of functionalities that are not necessary to be parsed during loading of DOM.
+This function accept one argument, which is type of:
+- function to call
+- path of external script to load 
+- array of both above (mixed function and/or paths)
 
-### DeferRendrScriptSequence
-This function accept first argument as array of web relative script paths to load, in order of course. Greates thing about this loader is fact, that next script will not load until the one before do. This makes defer loading dependencies very easy to implement.
-Argument can also accept functions to call, instead of loading external scripts (if you need to execute some JavaScript between script loading).
+#### Typical uses
+```html
+<head>
+  <script type="text/javascript">
+    // ... minified API
+    
+    // first, add to defer chain libraries or other dependencies
+    DeferReady([
+      '/js/jquery.min.js',
+      '/js/jquery-ui.min.js',
+      // .. some other dependencies
+    ]);
+  </script>
+</head>
+<body>
+  // ... some HTML content
+  <script type="text/javascript">
+    DeferReady(function () {
+      // load some application code for specific page
+    });
+  </script>
+  // ... some more HTML content
+  <script type="text/javascript">
+    // load other global application script
+    DeferReady('/js/scripts.min.js');
+    // ...
+    // execute defer chain, at the very bottom of </body> tag
+    DeferRenderScriptSequence();
+  </script>
+</body>
+```
+
+### DeferRenderScriptSequence
+This function accept first argument as array of:
+- function to call
+- path of external script to load 
+- array of both above (mixed function and/or paths)
+
+in order of course. Great thing about this loader is fact, that next script (function) will not execute until the one before do. This makes defer loading dependencies very easy to implement.
+
+#### Typical uses
+```html
+<body>
+  // ... whole content
+  <script type="text/javascript">
+    // call defer chain to execute
+    DeferRenderScriptSequence();
+    
+    // To be clear, above example IS NOT RELATED (on the same page) to the example below!
+    
+    // call custom chain, respect the order
+    DeferRenderScriptSequence([
+      '/js/uploadPhoto.min.js',
+      '/js/dragAndDrop.min.js',
+      function () {
+        $('#photoInput').uploadPhoto();
+        $('#photoGallery').dragAndDrop();
+      }
+    ]);
+  </script>
+</body>
+```
 
 ### DeferRenderScriptTag
 This simple function attach script tag to the DOM of document with specified `src` path, and optional `onload` second argument, what should be function to call after script is loaded.
 
-
-
-## Examples
-
-### Loading social scripts
-Let's take Facebook for example. You will load their SDK like this [source](https://developers.facebook.com/docs/javascript/quickstart):
+#### Typical use
 ```html
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : 'your-app-id',
-      xfbml      : true,
-      version    : 'v2.8'
-    });
-    FB.AppEvents.logPageView();
-  };
-
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-</script>
-```
-With API you will simply wrap whole code within `DeferReady` function:
-```html
-<!-- assuming you're loaded API inside head tag -->
-<script type="text/javascript">
-  DeferReady(function () {
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId      : 'your-app-id',
-        xfbml      : true,
-        version    : 'v2.8'
+<body>
+  <script type="text/javascript">
+    $('#enableWowPlugin').click(function () {
+      var me = $(this);
+      // load extra JS
+      DeferRenderScriptTag('/js/extra/wow.min.js', function () {
+        $('.wow').wow();
+        // do not load wow again by click...
+        me.remove();
       });
-      FB.AppEvents.logPageView();
-    };
-    
-    (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-  });
-</script>
+    });
+  </script>
+</body>
 ```
-You can place this piece of defered code anywhere inside `<body`> tag, but placing this at the end of `<body>` tag is recommended.
-
-### More to be documented...
