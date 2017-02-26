@@ -16,7 +16,8 @@ Then load some scripts with `DeferReady` function.
 ### DeferReady
 This function accept one argument, which is type of:
 - function to call
-- path of external script to load 
+- path of external script to load (must match /\.js$/)
+- path of external stylesheet to load (must **not** match /\.js$/)
 - array of both above (mixed function and/or paths)
 
 #### Typical uses
@@ -93,6 +94,25 @@ This simple function attach script tag to the DOM of document with specified `sr
       var me = $(this);
       // load extra JS
       DeferRenderScriptTag('/js/extra/wow.min.js', function () {
+        $('.wow').wow();
+        // do not load wow again by click...
+        me.remove();
+      });
+    });
+  </script>
+</body>
+
+### DeferRenderLinkTag
+This simple function attach link tag to the DOM of document with specified `href` path, and optional `onload` second argument, what should be function to call after stylesheet is loaded.
+
+#### Typical use
+```html
+<body>
+  <script type="text/javascript">
+    $('#enableWowPlugin').click(function () {
+      var me = $(this);
+      // load extra Stylesheet
+      DeferRenderLinkTag('/css/extra/wow.min.css', function () {
         $('.wow').wow();
         // do not load wow again by click...
         me.remove();
