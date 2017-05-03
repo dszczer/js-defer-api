@@ -2,7 +2,7 @@
  * Js Defer API.
  * @author Damian Szczerbiński
  * @license MIT
- * @version 1.2
+ * @version 1.2.1
  * @description This simple tricky API helps to defer script in specified order to load after HTML DOM is loaded.
  * I have idea about async and defer script tags, but not all browsers support them.
  * This API works fine on almost every browser.
@@ -41,7 +41,9 @@ function DeferRenderScriptSequence(s) {
             typeof p === "function" ? p() : "";
           }
           : function () {
-            a[n].match(/\.js$/) ? DeferRenderScriptTag(a[n], c.pop()) : DeferRenderLinkTag(a[n], c.pop());
+            (a[n] && a[n].constructor === Array) ?
+              (a[n][0].match(/[jJ][sS]/) ? DeferRenderScriptTag(a[n][1], c.pop()) : DeferRenderLinkTag(a[n][1], c.pop())) :
+              (a[n].match(/\.js$/) ? DeferRenderScriptTag(a[n], c.pop()) : DeferRenderLinkTag(a[n], c.pop()));
           };
       })(m)
     );
